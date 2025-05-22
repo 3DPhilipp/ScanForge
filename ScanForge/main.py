@@ -464,82 +464,281 @@ class MainWindow(QMainWindow):
         
         # Bake Settings Bereich
         bake_group = QGroupBox("Bake Settings")
-        bake_layout = QGridLayout()
+        bake_layout = QVBoxLayout()
+
+        # Map Types mit Checkboxen
+        maps_group = QGroupBox("Maps to Bake")
+        maps_layout = QGridLayout()
         
-        # Resolution
-        bake_layout.addWidget(QLabel("Resolution:"), 0, 0)
+        # Verfügbare Maps basierend auf Marmoset Toolbag
+        self.map_checkboxes = {}
+        available_maps = [
+            ("Normals", "Normal map from high poly"),
+            ("Height", "Height/Displacement map"),
+            ("Ambient Occlusion", "Ambient occlusion map"),
+            ("Curvature", "Surface curvature map"),
+            ("Position", "World space position map"),
+            ("Thickness", "Mesh thickness map"),
+            ("ID", "Material ID map"),
+            ("Bent Normals", "Bent normals for advanced shading")
+        ]
+
+        # Erstelle Checkboxen in einem 2x4 Grid
+        for i, (map_name, tooltip) in enumerate(available_maps):
+            checkbox = QCheckBox(map_name)
+            checkbox.setToolTip(tooltip)
+            self.map_checkboxes[map_name] = checkbox
+            maps_layout.addWidget(checkbox, i // 2, i % 2)
+
+        maps_group.setLayout(maps_layout)
+        bake_layout.addWidget(maps_group)
+
+        # Map-spezifische Einstellungen
+        map_settings_group = QGroupBox("Map Settings")
+        map_settings_layout = QVBoxLayout()
+
+        # Normal Map Settings
+        normal_settings = QGroupBox("Normal Map Settings")
+        normal_settings.setVisible(False)  # Standardmäßig versteckt
+        normal_layout = QVBoxLayout()
+        
+        # Normal Space
+        normal_space_layout = QHBoxLayout()
+        normal_space_label = QLabel("Normal Space:")
+        self.normal_space_combo = QComboBox()
+        normal_spaces = ["Tangent", "Object", "World"]
+        self.normal_space_combo.addItems(normal_spaces)
+        normal_space_layout.addWidget(normal_space_label)
+        normal_space_layout.addWidget(self.normal_space_combo)
+        normal_layout.addLayout(normal_space_layout)
+
+        # Normal Format
+        normal_format_layout = QHBoxLayout()
+        normal_format_label = QLabel("Normal Format:")
+        self.normal_format_combo = QComboBox()
+        normal_formats = ["OpenGL", "DirectX"]
+        self.normal_format_combo.addItems(normal_formats)
+        normal_format_layout.addWidget(normal_format_label)
+        normal_format_layout.addWidget(self.normal_format_combo)
+        normal_layout.addLayout(normal_format_layout)
+
+        normal_settings.setLayout(normal_layout)
+        map_settings_layout.addWidget(normal_settings)
+
+        # AO Settings
+        ao_settings = QGroupBox("Ambient Occlusion Settings")
+        ao_settings.setVisible(False)  # Standardmäßig versteckt
+        ao_layout = QVBoxLayout()
+        
+        # Ray Count
+        ao_rays_layout = QHBoxLayout()
+        ao_rays_label = QLabel("Ray Count:")
+        self.ao_rays_spin = QSpinBox()
+        self.ao_rays_spin.setRange(16, 512)
+        self.ao_rays_spin.setValue(128)
+        self.ao_rays_spin.setSingleStep(16)
+        ao_rays_layout.addWidget(ao_rays_label)
+        ao_rays_layout.addWidget(self.ao_rays_spin)
+        ao_layout.addLayout(ao_rays_layout)
+
+        # Max Distance
+        ao_distance_layout = QHBoxLayout()
+        ao_distance_label = QLabel("Max Distance:")
+        self.ao_distance_spin = QDoubleSpinBox()
+        self.ao_distance_spin.setRange(0.0, 10.0)
+        self.ao_distance_spin.setValue(0.5)
+        self.ao_distance_spin.setSingleStep(0.1)
+        self.ao_distance_spin.setSuffix(" units")
+        ao_distance_layout.addWidget(ao_distance_label)
+        ao_distance_layout.addWidget(self.ao_distance_spin)
+        ao_layout.addLayout(ao_distance_layout)
+
+        ao_settings.setLayout(ao_layout)
+        map_settings_layout.addWidget(ao_settings)
+
+        # Curvature Settings
+        curvature_settings = QGroupBox("Curvature Settings")
+        curvature_settings.setVisible(False)  # Standardmäßig versteckt
+        curvature_layout = QVBoxLayout()
+
+        # Mode
+        curvature_mode_layout = QHBoxLayout()
+        curvature_mode_label = QLabel("Mode:")
+        self.curvature_mode_combo = QComboBox()
+        curvature_modes = ["Average", "Cavity", "Convexity"]
+        self.curvature_mode_combo.addItems(curvature_modes)
+        curvature_mode_layout.addWidget(curvature_mode_label)
+        curvature_mode_layout.addWidget(self.curvature_mode_combo)
+        curvature_layout.addLayout(curvature_mode_layout)
+
+        # Radius
+        curvature_radius_layout = QHBoxLayout()
+        curvature_radius_label = QLabel("Radius:")
+        self.curvature_radius_spin = QDoubleSpinBox()
+        self.curvature_radius_spin.setRange(0.0, 10.0)
+        self.curvature_radius_spin.setValue(0.5)
+        self.curvature_radius_spin.setSingleStep(0.1)
+        self.curvature_radius_spin.setSuffix(" units")
+        curvature_radius_layout.addWidget(curvature_radius_label)
+        curvature_radius_layout.addWidget(self.curvature_radius_spin)
+        curvature_layout.addLayout(curvature_radius_layout)
+
+        curvature_settings.setLayout(curvature_layout)
+        map_settings_layout.addWidget(curvature_settings)
+
+        # Position Settings
+        position_settings = QGroupBox("Position Settings")
+        position_settings.setVisible(False)  # Standardmäßig versteckt
+        position_layout = QVBoxLayout()
+
+        # Space
+        position_space_layout = QHBoxLayout()
+        position_space_label = QLabel("Space:")
+        self.position_space_combo = QComboBox()
+        position_spaces = ["World", "Local", "UV"]
+        self.position_space_combo.addItems(position_spaces)
+        position_space_layout.addWidget(position_space_label)
+        position_space_layout.addWidget(self.position_space_combo)
+        position_layout.addLayout(position_space_layout)
+
+        position_settings.setLayout(position_layout)
+        map_settings_layout.addWidget(position_settings)
+
+        # Thickness Settings
+        thickness_settings = QGroupBox("Thickness Settings")
+        thickness_settings.setVisible(False)  # Standardmäßig versteckt
+        thickness_layout = QVBoxLayout()
+
+        # Ray Count
+        thickness_rays_layout = QHBoxLayout()
+        thickness_rays_label = QLabel("Ray Count:")
+        self.thickness_rays_spin = QSpinBox()
+        self.thickness_rays_spin.setRange(16, 512)
+        self.thickness_rays_spin.setValue(128)
+        self.thickness_rays_spin.setSingleStep(16)
+        thickness_rays_layout.addWidget(thickness_rays_label)
+        thickness_rays_layout.addWidget(self.thickness_rays_spin)
+        thickness_layout.addLayout(thickness_rays_layout)
+
+        # Max Distance
+        thickness_distance_layout = QHBoxLayout()
+        thickness_distance_label = QLabel("Max Distance:")
+        self.thickness_distance_spin = QDoubleSpinBox()
+        self.thickness_distance_spin.setRange(0.0, 10.0)
+        self.thickness_distance_spin.setValue(0.5)
+        self.thickness_distance_spin.setSingleStep(0.1)
+        self.thickness_distance_spin.setSuffix(" units")
+        thickness_distance_layout.addWidget(thickness_distance_label)
+        thickness_distance_layout.addWidget(self.thickness_distance_spin)
+        thickness_layout.addLayout(thickness_distance_layout)
+
+        thickness_settings.setLayout(thickness_layout)
+        map_settings_layout.addWidget(thickness_settings)
+
+        map_settings_group.setLayout(map_settings_layout)
+        bake_layout.addWidget(map_settings_group)
+
+        # Verbinde Checkboxen mit Sichtbarkeit der Einstellungen
+        self.map_settings_groups = {
+            "Normals": normal_settings,
+            "Ambient Occlusion": ao_settings,
+            "Curvature": curvature_settings,
+            "Position": position_settings,
+            "Thickness": thickness_settings
+        }
+
+        for map_name, settings_group in self.map_settings_groups.items():
+            self.map_checkboxes[map_name].toggled.connect(
+                lambda checked, group=settings_group: group.setVisible(checked)
+            )
+
+        # Bake Resolution
+        resolution_layout = QHBoxLayout()
+        resolution_label = QLabel("Resolution:")
         self.bake_resolution_combo = QComboBox()
-        self.bake_resolution_combo.addItems(["256x256", "512x512", "1024x1024", "2048x2048", "4096x4096", "8192x8192"])
-        bake_layout.addWidget(self.bake_resolution_combo, 0, 1)
-        
-        # Format
-        bake_layout.addWidget(QLabel("Format:"), 1, 0)
+        resolutions = ["256x256", "512x512", "1024x1024", "2048x2048", "4096x4096", "8192x8192"]
+        self.bake_resolution_combo.addItems(resolutions)
+        self.bake_resolution_combo.setCurrentText("2048x2048")
+        resolution_layout.addWidget(resolution_label)
+        resolution_layout.addWidget(self.bake_resolution_combo)
+        bake_layout.addLayout(resolution_layout)
+
+        # Output Format
+        format_layout = QHBoxLayout()
+        format_label = QLabel("Format:")
         self.bake_format_combo = QComboBox()
-        self.bake_format_combo.addItems(["PNG", "TGA"])
-        bake_layout.addWidget(self.bake_format_combo, 1, 1)
-        
+        formats = ["PNG", "TGA"]
+        self.bake_format_combo.addItems(formats)
+        format_layout.addWidget(format_label)
+        format_layout.addWidget(self.bake_format_combo)
+        bake_layout.addLayout(format_layout)
+
         # Anti-Aliasing
-        bake_layout.addWidget(QLabel("Anti-Aliasing:"), 2, 0)
+        aa_layout = QHBoxLayout()
+        aa_label = QLabel("Anti-Aliasing:")
         self.anti_aliasing_combo = QComboBox()
-        self.anti_aliasing_combo.addItems(["None", "2x", "4x", "8x"])
-        bake_layout.addWidget(self.anti_aliasing_combo, 2, 1)
-        
-        # Cage Settings in einem eigenen GroupBox
+        aa_options = ["None", "2x", "4x", "8x"]
+        self.anti_aliasing_combo.addItems(aa_options)
+        aa_layout.addWidget(aa_label)
+        aa_layout.addWidget(self.anti_aliasing_combo)
+        bake_layout.addLayout(aa_layout)
+
+        # Cage Settings
         cage_group = QGroupBox("Cage Settings")
-        cage_layout = QGridLayout()
-        
+        cage_layout = QVBoxLayout()
+
         # External Cage Option
+        cage_type_layout = QHBoxLayout()
         self.use_external_cage = QCheckBox("Use External Cage")
-        self.use_external_cage.setChecked(False)
-        cage_layout.addWidget(self.use_external_cage, 0, 0, 1, 2)
+        self.use_external_cage.toggled.connect(self.toggle_external_cage)
+        cage_type_layout.addWidget(self.use_external_cage)
+        cage_layout.addLayout(cage_type_layout)
 
         # External Cage File Selection
         cage_file_layout = QHBoxLayout()
         self.cage_file_edit = QLineEdit()
         self.cage_file_edit.setPlaceholderText("No cage file selected...")
         self.cage_file_edit.setEnabled(False)
-        cage_file_layout.addWidget(self.cage_file_edit)
-
         self.cage_file_btn = QPushButton("Select Cage")
-        self.cage_file_btn.setEnabled(False)
         self.cage_file_btn.clicked.connect(self.select_cage_file)
+        self.cage_file_btn.setEnabled(False)
+        cage_file_layout.addWidget(self.cage_file_edit)
         cage_file_layout.addWidget(self.cage_file_btn)
+        cage_layout.addLayout(cage_file_layout)
 
-        cage_layout.addLayout(cage_file_layout, 1, 0, 1, 2)
-        
-        # Bestehende Cage Settings
-        cage_layout.addWidget(QLabel("Cage Offset:"), 2, 0)
+        # Cage Offset
+        cage_offset_layout = QHBoxLayout()
+        cage_offset_label = QLabel("Cage Offset:")
         self.cage_offset_spin = QDoubleSpinBox()
         self.cage_offset_spin.setRange(0.0, 10.0)
         self.cage_offset_spin.setSingleStep(0.01)
         self.cage_offset_spin.setValue(0.02)
         self.cage_offset_spin.setSuffix(" units")
-        cage_layout.addWidget(self.cage_offset_spin, 2, 1)
+        cage_offset_layout.addWidget(cage_offset_label)
+        cage_offset_layout.addWidget(self.cage_offset_spin)
+        cage_layout.addLayout(cage_offset_layout)
 
-        cage_layout.addWidget(QLabel("Max Ray Distance:"), 3, 0)
+        # Ray Distance
+        ray_distance_layout = QHBoxLayout()
+        ray_distance_label = QLabel("Max Ray Distance:")
         self.ray_distance_spin = QDoubleSpinBox()
         self.ray_distance_spin.setRange(0.0, 100.0)
         self.ray_distance_spin.setSingleStep(0.1)
         self.ray_distance_spin.setValue(1.0)
         self.ray_distance_spin.setSuffix(" units")
-        cage_layout.addWidget(self.ray_distance_spin, 3, 1)
+        ray_distance_layout.addWidget(ray_distance_label)
+        ray_distance_layout.addWidget(self.ray_distance_spin)
+        cage_layout.addLayout(ray_distance_layout)
 
+        # UV and Hard Edge Options
         self.match_uv_seams = QCheckBox("Match UV Seams")
-        self.match_uv_seams.setChecked(True)
-        cage_layout.addWidget(self.match_uv_seams, 4, 0, 1, 2)
-
         self.match_hard_edges = QCheckBox("Match Hard Edges")
-        self.match_hard_edges.setChecked(True)
-        cage_layout.addWidget(self.match_hard_edges, 5, 0, 1, 2)
-
-        # Verbinde Checkbox mit Enable/Disable Funktion
-        self.use_external_cage.toggled.connect(self.toggle_external_cage)
+        cage_layout.addWidget(self.match_uv_seams)
+        cage_layout.addWidget(self.match_hard_edges)
 
         cage_group.setLayout(cage_layout)
-        
-        # Füge Cage Settings zum Bake Layout hinzu
-        bake_layout.addWidget(cage_group, 3, 0, 1, 2)
-        
+        bake_layout.addWidget(cage_group)
+
         bake_group.setLayout(bake_layout)
         pipeline_layout.addWidget(bake_group)
         
@@ -740,171 +939,282 @@ class MainWindow(QMainWindow):
 
     def create_bake_settings(self):
         bake_group = QGroupBox("Bake Settings")
-        bake_layout = QGridLayout()
+        bake_layout = QVBoxLayout()
+
+        # Map Types mit Checkboxen
+        maps_group = QGroupBox("Maps to Bake")
+        maps_layout = QGridLayout()
+        
+        # Verfügbare Maps basierend auf Marmoset Toolbag
+        self.map_checkboxes = {}
+        available_maps = [
+            ("Normals", "Normal map from high poly"),
+            ("Height", "Height/Displacement map"),
+            ("Ambient Occlusion", "Ambient occlusion map"),
+            ("Curvature", "Surface curvature map"),
+            ("Position", "World space position map"),
+            ("Thickness", "Mesh thickness map"),
+            ("ID", "Material ID map"),
+            ("Bent Normals", "Bent normals for advanced shading")
+        ]
+
+        # Erstelle Checkboxen in einem 2x4 Grid
+        for i, (map_name, tooltip) in enumerate(available_maps):
+            checkbox = QCheckBox(map_name)
+            checkbox.setToolTip(tooltip)
+            self.map_checkboxes[map_name] = checkbox
+            maps_layout.addWidget(checkbox, i // 2, i % 2)
+
+        maps_group.setLayout(maps_layout)
+        bake_layout.addWidget(maps_group)
+
+        # Map-spezifische Einstellungen
+        map_settings_group = QGroupBox("Map Settings")
+        map_settings_layout = QVBoxLayout()
+
+        # Normal Map Settings
+        normal_settings = QGroupBox("Normal Map Settings")
+        normal_settings.setVisible(False)  # Standardmäßig versteckt
+        normal_layout = QVBoxLayout()
+        
+        # Normal Space
+        normal_space_layout = QHBoxLayout()
+        normal_space_label = QLabel("Normal Space:")
+        self.normal_space_combo = QComboBox()
+        normal_spaces = ["Tangent", "Object", "World"]
+        self.normal_space_combo.addItems(normal_spaces)
+        normal_space_layout.addWidget(normal_space_label)
+        normal_space_layout.addWidget(self.normal_space_combo)
+        normal_layout.addLayout(normal_space_layout)
+
+        # Normal Format
+        normal_format_layout = QHBoxLayout()
+        normal_format_label = QLabel("Normal Format:")
+        self.normal_format_combo = QComboBox()
+        normal_formats = ["OpenGL", "DirectX"]
+        self.normal_format_combo.addItems(normal_formats)
+        normal_format_layout.addWidget(normal_format_label)
+        normal_format_layout.addWidget(self.normal_format_combo)
+        normal_layout.addLayout(normal_format_layout)
+
+        normal_settings.setLayout(normal_layout)
+        map_settings_layout.addWidget(normal_settings)
+
+        # AO Settings
+        ao_settings = QGroupBox("Ambient Occlusion Settings")
+        ao_settings.setVisible(False)  # Standardmäßig versteckt
+        ao_layout = QVBoxLayout()
+        
+        # Ray Count
+        ao_rays_layout = QHBoxLayout()
+        ao_rays_label = QLabel("Ray Count:")
+        self.ao_rays_spin = QSpinBox()
+        self.ao_rays_spin.setRange(16, 512)
+        self.ao_rays_spin.setValue(128)
+        self.ao_rays_spin.setSingleStep(16)
+        ao_rays_layout.addWidget(ao_rays_label)
+        ao_rays_layout.addWidget(self.ao_rays_spin)
+        ao_layout.addLayout(ao_rays_layout)
+
+        # Max Distance
+        ao_distance_layout = QHBoxLayout()
+        ao_distance_label = QLabel("Max Distance:")
+        self.ao_distance_spin = QDoubleSpinBox()
+        self.ao_distance_spin.setRange(0.0, 10.0)
+        self.ao_distance_spin.setValue(0.5)
+        self.ao_distance_spin.setSingleStep(0.1)
+        self.ao_distance_spin.setSuffix(" units")
+        ao_distance_layout.addWidget(ao_distance_label)
+        ao_distance_layout.addWidget(self.ao_distance_spin)
+        ao_layout.addLayout(ao_distance_layout)
+
+        ao_settings.setLayout(ao_layout)
+        map_settings_layout.addWidget(ao_settings)
+
+        # Curvature Settings
+        curvature_settings = QGroupBox("Curvature Settings")
+        curvature_settings.setVisible(False)  # Standardmäßig versteckt
+        curvature_layout = QVBoxLayout()
+
+        # Mode
+        curvature_mode_layout = QHBoxLayout()
+        curvature_mode_label = QLabel("Mode:")
+        self.curvature_mode_combo = QComboBox()
+        curvature_modes = ["Average", "Cavity", "Convexity"]
+        self.curvature_mode_combo.addItems(curvature_modes)
+        curvature_mode_layout.addWidget(curvature_mode_label)
+        curvature_mode_layout.addWidget(self.curvature_mode_combo)
+        curvature_layout.addLayout(curvature_mode_layout)
+
+        # Radius
+        curvature_radius_layout = QHBoxLayout()
+        curvature_radius_label = QLabel("Radius:")
+        self.curvature_radius_spin = QDoubleSpinBox()
+        self.curvature_radius_spin.setRange(0.0, 10.0)
+        self.curvature_radius_spin.setValue(0.5)
+        self.curvature_radius_spin.setSingleStep(0.1)
+        self.curvature_radius_spin.setSuffix(" units")
+        curvature_radius_layout.addWidget(curvature_radius_label)
+        curvature_radius_layout.addWidget(self.curvature_radius_spin)
+        curvature_layout.addLayout(curvature_radius_layout)
+
+        curvature_settings.setLayout(curvature_layout)
+        map_settings_layout.addWidget(curvature_settings)
+
+        # Position Settings
+        position_settings = QGroupBox("Position Settings")
+        position_settings.setVisible(False)  # Standardmäßig versteckt
+        position_layout = QVBoxLayout()
+
+        # Space
+        position_space_layout = QHBoxLayout()
+        position_space_label = QLabel("Space:")
+        self.position_space_combo = QComboBox()
+        position_spaces = ["World", "Local", "UV"]
+        self.position_space_combo.addItems(position_spaces)
+        position_space_layout.addWidget(position_space_label)
+        position_space_layout.addWidget(self.position_space_combo)
+        position_layout.addLayout(position_space_layout)
+
+        position_settings.setLayout(position_layout)
+        map_settings_layout.addWidget(position_settings)
+
+        # Thickness Settings
+        thickness_settings = QGroupBox("Thickness Settings")
+        thickness_settings.setVisible(False)  # Standardmäßig versteckt
+        thickness_layout = QVBoxLayout()
+
+        # Ray Count
+        thickness_rays_layout = QHBoxLayout()
+        thickness_rays_label = QLabel("Ray Count:")
+        self.thickness_rays_spin = QSpinBox()
+        self.thickness_rays_spin.setRange(16, 512)
+        self.thickness_rays_spin.setValue(128)
+        self.thickness_rays_spin.setSingleStep(16)
+        thickness_rays_layout.addWidget(thickness_rays_label)
+        thickness_rays_layout.addWidget(self.thickness_rays_spin)
+        thickness_layout.addLayout(thickness_rays_layout)
+
+        # Max Distance
+        thickness_distance_layout = QHBoxLayout()
+        thickness_distance_label = QLabel("Max Distance:")
+        self.thickness_distance_spin = QDoubleSpinBox()
+        self.thickness_distance_spin.setRange(0.0, 10.0)
+        self.thickness_distance_spin.setValue(0.5)
+        self.thickness_distance_spin.setSingleStep(0.1)
+        self.thickness_distance_spin.setSuffix(" units")
+        thickness_distance_layout.addWidget(thickness_distance_label)
+        thickness_distance_layout.addWidget(self.thickness_distance_spin)
+        thickness_layout.addLayout(thickness_distance_layout)
+
+        thickness_settings.setLayout(thickness_layout)
+        map_settings_layout.addWidget(thickness_settings)
+
+        map_settings_group.setLayout(map_settings_layout)
+        bake_layout.addWidget(map_settings_group)
+
+        # Verbinde Checkboxen mit Sichtbarkeit der Einstellungen
+        self.map_settings_groups = {
+            "Normals": normal_settings,
+            "Ambient Occlusion": ao_settings,
+            "Curvature": curvature_settings,
+            "Position": position_settings,
+            "Thickness": thickness_settings
+        }
+
+        for map_name, settings_group in self.map_settings_groups.items():
+            self.map_checkboxes[map_name].toggled.connect(
+                lambda checked, group=settings_group: group.setVisible(checked)
+            )
+
+        # Bake Resolution
+        resolution_layout = QHBoxLayout()
+        resolution_label = QLabel("Resolution:")
+        self.bake_resolution_combo = QComboBox()
+        resolutions = ["256x256", "512x512", "1024x1024", "2048x2048", "4096x4096", "8192x8192"]
+        self.bake_resolution_combo.addItems(resolutions)
+        self.bake_resolution_combo.setCurrentText("2048x2048")
+        resolution_layout.addWidget(resolution_label)
+        resolution_layout.addWidget(self.bake_resolution_combo)
+        bake_layout.addLayout(resolution_layout)
+
+        # Output Format
+        format_layout = QHBoxLayout()
+        format_label = QLabel("Format:")
+        self.bake_format_combo = QComboBox()
+        formats = ["PNG", "TGA"]
+        self.bake_format_combo.addItems(formats)
+        format_layout.addWidget(format_label)
+        format_layout.addWidget(self.bake_format_combo)
+        bake_layout.addLayout(format_layout)
+
+        # Anti-Aliasing
+        aa_layout = QHBoxLayout()
+        aa_label = QLabel("Anti-Aliasing:")
+        self.anti_aliasing_combo = QComboBox()
+        aa_options = ["None", "2x", "4x", "8x"]
+        self.anti_aliasing_combo.addItems(aa_options)
+        aa_layout.addWidget(aa_label)
+        aa_layout.addWidget(self.anti_aliasing_combo)
+        bake_layout.addLayout(aa_layout)
 
         # Cage Settings
         cage_group = QGroupBox("Cage Settings")
-        cage_layout = QGridLayout()
+        cage_layout = QVBoxLayout()
+
+        # External Cage Option
+        cage_type_layout = QHBoxLayout()
+        self.use_external_cage = QCheckBox("Use External Cage")
+        self.use_external_cage.toggled.connect(self.toggle_external_cage)
+        cage_type_layout.addWidget(self.use_external_cage)
+        cage_layout.addLayout(cage_type_layout)
+
+        # External Cage File Selection
+        cage_file_layout = QHBoxLayout()
+        self.cage_file_edit = QLineEdit()
+        self.cage_file_edit.setPlaceholderText("No cage file selected...")
+        self.cage_file_edit.setEnabled(False)
+        self.cage_file_btn = QPushButton("Select Cage")
+        self.cage_file_btn.clicked.connect(self.select_cage_file)
+        self.cage_file_btn.setEnabled(False)
+        cage_file_layout.addWidget(self.cage_file_edit)
+        cage_file_layout.addWidget(self.cage_file_btn)
+        cage_layout.addLayout(cage_file_layout)
 
         # Cage Offset
-        cage_layout.addWidget(QLabel("Cage Offset:"), 0, 0)
+        cage_offset_layout = QHBoxLayout()
+        cage_offset_label = QLabel("Cage Offset:")
         self.cage_offset_spin = QDoubleSpinBox()
         self.cage_offset_spin.setRange(0.0, 10.0)
         self.cage_offset_spin.setSingleStep(0.01)
-        self.cage_offset_spin.setValue(0.02)  # Standard-Wert
+        self.cage_offset_spin.setValue(0.02)
         self.cage_offset_spin.setSuffix(" units")
-        cage_layout.addWidget(self.cage_offset_spin, 0, 1)
+        cage_offset_layout.addWidget(cage_offset_label)
+        cage_offset_layout.addWidget(self.cage_offset_spin)
+        cage_layout.addLayout(cage_offset_layout)
 
         # Ray Distance
-        cage_layout.addWidget(QLabel("Max Ray Distance:"), 1, 0)
+        ray_distance_layout = QHBoxLayout()
+        ray_distance_label = QLabel("Max Ray Distance:")
         self.ray_distance_spin = QDoubleSpinBox()
         self.ray_distance_spin.setRange(0.0, 100.0)
         self.ray_distance_spin.setSingleStep(0.1)
-        self.ray_distance_spin.setValue(1.0)  # Standard-Wert
+        self.ray_distance_spin.setValue(1.0)
         self.ray_distance_spin.setSuffix(" units")
-        cage_layout.addWidget(self.ray_distance_spin, 1, 1)
+        ray_distance_layout.addWidget(ray_distance_label)
+        ray_distance_layout.addWidget(self.ray_distance_spin)
+        cage_layout.addLayout(ray_distance_layout)
 
-        # Match UV Seams
+        # UV and Hard Edge Options
         self.match_uv_seams = QCheckBox("Match UV Seams")
-        self.match_uv_seams.setChecked(True)
-        cage_layout.addWidget(self.match_uv_seams, 2, 0, 1, 2)
-
-        # Match Hard Edges
         self.match_hard_edges = QCheckBox("Match Hard Edges")
-        self.match_hard_edges.setChecked(True)
-        cage_layout.addWidget(self.match_hard_edges, 3, 0, 1, 2)
+        cage_layout.addWidget(self.match_uv_seams)
+        cage_layout.addWidget(self.match_hard_edges)
 
         cage_group.setLayout(cage_layout)
-        bake_layout.addWidget(cage_group, 2, 0, 1, 2)  # Position nach Resolution und Format
+        bake_layout.addWidget(cage_group)
 
-        # Output Settings
-        output_group = QGroupBox("Output Settings")
-        output_layout = QGridLayout()
-        output_layout.setSpacing(10)
-        
-        # Resolution
-        output_layout.addWidget(QLabel("Resolution:"), 0, 0)
-        self.resolution_combo = QComboBox()
-        resolutions = ["256x256", "512x512", "1024x1024", "2048x2048", "4096x4096", "8192x8192"]
-        self.resolution_combo.addItems(resolutions)
-        self.resolution_combo.setCurrentText("2048x2048")
-        output_layout.addWidget(self.resolution_combo, 0, 1)
-        
-        # Format
-        output_layout.addWidget(QLabel("Format:"), 1, 0)
-        self.format_combo = QComboBox()
-        self.format_combo.addItems(["PNG", "TGA"])
-        output_layout.addWidget(self.format_combo, 1, 1)
-        
-        # Bit Depth
-        output_layout.addWidget(QLabel("Bit Depth:"), 2, 0)
-        self.bit_depth_combo = QComboBox()
-        self.bit_depth_combo.addItems(["8-bit", "16-bit"])
-        output_layout.addWidget(self.bit_depth_combo, 2, 1)
-        
-        output_group.setLayout(output_layout)
-        bake_layout.addWidget(output_group)
-        
-        # Bake Options
-        options_group = QGroupBox("Bake Options")
-        options_layout = QGridLayout()
-        options_layout.setSpacing(10)
-        
-        # Anti-aliasing
-        options_layout.addWidget(QLabel("Anti-aliasing:"), 0, 0)
-        self.aa_combo = QComboBox()
-        self.aa_combo.addItems(["None", "2x", "4x", "8x"])
-        self.aa_combo.setCurrentText("4x")
-        options_layout.addWidget(self.aa_combo, 0, 1)
-        
-        # Edge Padding
-        options_layout.addWidget(QLabel("Edge Padding:"), 1, 0)
-        self.edge_padding_spin = QSpinBox()
-        self.edge_padding_spin.setRange(0, 64)
-        self.edge_padding_spin.setValue(16)
-        self.edge_padding_spin.setSuffix(" px")
-        options_layout.addWidget(self.edge_padding_spin, 1, 1)
-        
-        # Dilation Width
-        options_layout.addWidget(QLabel("Dilation Width:"), 2, 0)
-        self.dilation_spin = QSpinBox()
-        self.dilation_spin.setRange(0, 32)
-        self.dilation_spin.setValue(4)
-        self.dilation_spin.setSuffix(" px")
-        options_layout.addWidget(self.dilation_spin, 2, 1)
-        
-        options_group.setLayout(options_layout)
-        bake_layout.addWidget(options_group)
-        
-        # Maps Settings
-        maps_group = QGroupBox("Maps")
-        maps_layout = QVBoxLayout()
-        maps_layout.setSpacing(10)
-        
-        self.bake_settings = {}
-        maps_config = {
-            "Normal Map": {
-                "options": {
-                    "Format": ["OpenGL", "DirectX"],
-                    "Surface Transfer": ["Closest", "Raycasting", "Subdivision"]
-                }
-            },
-            "Ambient Occlusion": {
-                "options": {
-                    "Ray Count": [16, 32, 64, 128, 256],
-                    "Max Distance": ["0.1", "0.5", "1.0", "2.0", "5.0"]
-                }
-            },
-            "Curvature": {
-                "options": {
-                    "Mode": ["Average", "Cavity", "Convexity"],
-                    "Radius": ["0.1", "0.5", "1.0", "2.0", "5.0"]
-                }
-            },
-            "Position": {
-                "options": {
-                    "Space": ["World", "Local", "UV"]
-                }
-            },
-            "Thickness": {
-                "options": {
-                    "Ray Count": [16, 32, 64, 128, 256],
-                    "Max Distance": ["0.1", "0.5", "1.0", "2.0", "5.0"]
-                }
-            }
-        }
-        
-        for map_name, config in maps_config.items():
-            map_frame = QFrame()
-            map_frame.setFrameStyle(QFrame.StyledPanel)
-            map_layout = QGridLayout(map_frame)
-            map_layout.setSpacing(10)
-            
-            # Enable checkbox
-            enable_cb = QCheckBox(map_name)
-            enable_cb.setChecked(True)
-            map_layout.addWidget(enable_cb, 0, 0, 1, 2)
-            
-            # Map specific options
-            row = 1
-            map_settings = {"enabled": enable_cb}
-            
-            if "options" in config:
-                for option_name, values in config["options"].items():
-                    map_layout.addWidget(QLabel(f"{option_name}:"), row, 0)
-                    combo = QComboBox()
-                    combo.addItems([str(v) for v in values])
-                    combo.setCurrentText(str(values[0]))
-                    map_layout.addWidget(combo, row, 1)
-                    map_settings[option_name] = combo
-                    row += 1
-            
-            self.bake_settings[map_name] = map_settings
-            maps_layout.addWidget(map_frame)
-        
-        maps_group.setLayout(maps_layout)
-        bake_layout.addWidget(maps_group)
-        
+        bake_group.setLayout(bake_layout)
         return bake_group
 
     def toggle_external_cage(self):
@@ -966,6 +1276,13 @@ class MainWindow(QMainWindow):
                 'resolution': self.bake_resolution_combo.currentText(),
                 'format': self.bake_format_combo.currentText(),
                 'anti_aliasing': self.anti_aliasing_combo.currentText(),
+                'maps': {
+                    map_name: {
+                        'enabled': checkbox.isChecked(),
+                        'settings': self.get_map_specific_settings(map_name)
+                    }
+                    for map_name, checkbox in self.map_checkboxes.items()
+                },
                 'cage': {
                     'use_external': self.use_external_cage.isChecked(),
                     'external_file': self.cage_file_edit.text() if self.use_external_cage.isChecked() else None,
@@ -977,6 +1294,34 @@ class MainWindow(QMainWindow):
             }
         }
         return settings
+
+    def get_map_specific_settings(self, map_name):
+        """Get settings specific to each map type"""
+        if map_name == "Normals":
+            return {
+                'space': self.normal_space_combo.currentText(),
+                'format': self.normal_format_combo.currentText()
+            }
+        elif map_name == "Ambient Occlusion":
+            return {
+                'ray_count': self.ao_rays_spin.value(),
+                'max_distance': self.ao_distance_spin.value()
+            }
+        elif map_name == "Curvature":
+            return {
+                'mode': self.curvature_mode_combo.currentText(),
+                'radius': self.curvature_radius_spin.value()
+            }
+        elif map_name == "Position":
+            return {
+                'space': self.position_space_combo.currentText()
+            }
+        elif map_name == "Thickness":
+            return {
+                'ray_count': self.thickness_rays_spin.value(),
+                'max_distance': self.thickness_distance_spin.value()
+            }
+        return {}  # Leeres Dict für Maps ohne spezifische Einstellungen
 
 def main():
     app = QApplication(sys.argv)

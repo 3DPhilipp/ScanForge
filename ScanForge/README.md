@@ -1,73 +1,67 @@
 # ScanForge
 
-A tool for automated 3D model processing using Houdini and Marmoset Toolbag.
+A powerful Python tool for processing 3D scans using Houdini and Marmoset Toolbag.
 
 ## Features
-- LOD Generation (LOD0-LOD4)
-- Automated UV unwrapping
-- Map baking in Marmoset Toolbag
-- Support for custom cage meshes
+
+- Import high-poly FBX scans into Houdini
+- Automatic mesh decimation and cleaning
+- LOD generation (LOD0-4)
+- UV creation
+- Map baking in Marmoset Toolbag with support for:
+  - Normal maps
+  - Height maps
+  - Ambient Occlusion
+  - Curvature maps
+  - Position maps
+  - Thickness maps
+  - ID maps
+  - Bent Normal maps
+- Modern UI with dark theme
+- Configuration saving/loading
 
 ## Requirements
-- Python 3.x
+
+- Python 3.8+
 - PySide6
-- Houdini Indie
+- Houdini
 - Marmoset Toolbag
 
 ## Installation
-1. Clone the repository
-```git clone https://github.com/YourUsername/ScanForge.git```
 
-2. Install requirements
-```pip install -r requirements.txt```
-
-## Usage
-Run the main script:
-```python src/main.py```
-```
-
-5. Jetzt die GitHub-Schritte:
+1. Clone the repository:
 ```bash
-# Initialisiere Git im Projektordner
-git init
-
-# Füge alle Dateien hinzu
-git add .
-
-# Erstelle den ersten Commit
-git commit -m "Initial commit"
-
-# Erstellen Sie ein neues Repository auf GitHub.com
-
-# Verbinde das lokale Repository mit GitHub
-git remote add origin https://github.com/IhrUsername/ScanForge.git
-
-# Push den Code zu GitHub
-git push -u origin main
+git clone https://github.com/yourusername/ScanForge.git
 ```
 
-Um von einem anderen PC aus zu arbeiten:
-1. Git auf dem anderen PC installieren
-2. Repository klonen:
-```bash
-git clone https://github.com/IhrUsername/ScanForge.git
-```
-3. Requirements installieren:
+2. Install the required Python packages:
 ```bash
 pip install -r requirements.txt
 ```
 
-Typischer Workflow beim Arbeiten von verschiedenen PCs:
-1. Vor dem Arbeiten immer erst pullen:
+3. Configure the application paths in the Settings tab:
+   - Set Houdini executable path
+   - Set Marmoset Toolbag executable path
+   - (Optional) Set Python environment path
+   - (Optional) Set license file path
+
+## Usage
+
+1. Launch the application:
 ```bash
-git pull origin main
+python -m src.main
 ```
 
-2. Nach Änderungen:
-```bash
-git add .
-git commit -m "Beschreibung der Änderungen"
-git push origin main
-```
+2. Select your input FBX file
+3. Configure LOD settings
+4. Select maps to bake and their settings
+5. Configure cage settings
+6. Click "Process Model" to start the pipeline
 
-Soll ich Ihnen bei der Einrichtung des GitHub Repositories helfen?
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Author
+
+Created by The Triangle Forge (https://thetriangleforge.de)
