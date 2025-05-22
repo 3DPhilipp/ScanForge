@@ -20,6 +20,16 @@ class Config:
             'default_preset': 'default'
         }
         
+        self.settings = {
+            'last_project_dir': '',
+            'last_output_dir': '',
+            'houdini_path': '',
+            'marmoset_path': '',
+            'houdini_project': '',
+            'python_env': '',
+            'license_file': ''
+        }
+        
         self.load_config()
 
     def load_config(self):

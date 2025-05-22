@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QSizePolicy, QFrame, QDoubleSpinBox, QTextEdit)
 from PySide6.QtCore import Qt, QDateTime
 from PySide6.QtGui import QPalette, QColor, QPixmap, QPainter, QPainterPath
-from config import Config
+from src.config import Config
 import json
 
 DARK_THEME_STYLE = """
@@ -712,11 +712,11 @@ class MainWindow(QMainWindow):
             self.log("No output directory selected!", "ERROR")
             return
         
-        if not Path(self.houdini_path.text()).exists():
+        if not Path(self.houdini_path_edit.text()).exists():
             self.log("Houdini path is not set or invalid.", "ERROR")
             return
         
-        if not Path(self.marmoset_path.text()).exists():
+        if not Path(self.marmoset_path_edit.text()).exists():
             self.log("Marmoset Toolbag path is not set or invalid.", "ERROR")
             return
         
@@ -731,7 +731,7 @@ class MainWindow(QMainWindow):
         settings = self.get_current_settings()
         settings['output_path'] = self.output_path.text()
         self.log("Processing with settings:", "INFO")
-        self.log(json.dumps(settings), "INFO")
+        self.log(json.dumps(settings, indent=2), "INFO")
         
         # Update progress bar
         current = self.progress.value()
@@ -954,6 +954,29 @@ class MainWindow(QMainWindow):
     def clear_log(self):
         """Löscht den gesamten Log"""
         self.log_text.clear()
+
+    def get_current_settings(self):
+        """Get all current settings from the UI"""
+        settings = {
+            'input_file': self.file_path.text(),
+            'output_path': self.output_path.text(),
+            'houdini_path': self.houdini_path_edit.text(),
+            'marmoset_path': self.marmoset_path_edit.text(),
+            'bake_settings': {
+                'resolution': self.bake_resolution_combo.currentText(),
+                'format': self.bake_format_combo.currentText(),
+                'anti_aliasing': self.anti_aliasing_combo.currentText(),
+                'cage': {
+                    'use_external': self.use_external_cage.isChecked(),
+                    'external_file': self.cage_file_edit.text() if self.use_external_cage.isChecked() else None,
+                    'offset': self.cage_offset_spin.value(),
+                    'ray_distance': self.ray_distance_spin.value(),
+                    'match_uv_seams': self.match_uv_seams.isChecked(),
+                    'match_hard_edges': self.match_hard_edges.isChecked()
+                }
+            }
+        }
+        return settings
 
 def main():
     app = QApplication(sys.argv)

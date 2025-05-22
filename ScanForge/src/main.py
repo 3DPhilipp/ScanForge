@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QSizePolicy, QFrame, QDoubleSpinBox, QTextEdit)
 from PySide6.QtCore import Qt, QDateTime
 from PySide6.QtGui import QPalette, QColor, QPixmap, QPainter, QPainterPath
-from config import Config
+from src.config import Config
 import json
 
 DARK_THEME_STYLE = """
